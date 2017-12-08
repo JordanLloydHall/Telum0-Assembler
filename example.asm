@@ -3,14 +3,12 @@ section .text
 ; Code goes here
 
 _start:
-ADD A, B
-SUB B, A
-LDA B, 122
+JMpz 44
+lda a, hello
+jmpz _start
+IN A ; Inputs a reg
+Out b ; Outputs b reg
 
 section .data
-; Data/Variables go here
-hello db 5
-lmao db 22
 
-section .bss
-
+a 44

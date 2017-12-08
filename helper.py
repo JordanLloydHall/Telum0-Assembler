@@ -20,6 +20,6 @@ def process(file):
 		if line == "":
 			continue
 		else:
-			tokFile.append([x.replace(" ", "").replace(",", "") for x in line.split(" ")])
+			tokFile.append([x.replace(" ", "").replace(",", "") for x in line.split(" ") if x != ""])
 
 	return tokFile

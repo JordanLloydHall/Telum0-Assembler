@@ -26,11 +26,148 @@ def evaluate(file):
 	for line in file:
 		if line[0] == "SECTION":
 			if len(line) != 2:
-				error("Section only takes 1 operand")
+				error("Section only takes 1 operand.")
 			else:
+				text, data, bss = False, False, False
 				if line[1] == ".TEXT":
+					text = True
+
+				elif line[1] == ".DATA":
+					data = True
+
+				elif line[1] == ".BSS":
+					bss = True
+				else:
+					error("Section type not recognised.")
+
+		elif text == True:
+			if line[0] == "ADD":
+				if len(line) != 3:
+					error("An add operation requires 2 operands.")
+				else:
+					if (line[1] in REGS) and (line[2] in REGS):
+						tBlock.append([ADD[(line[1], line[2])]])
+					else:
+						error("Add operations can only interact with registers.")
+
+			elif line[0] == "SUB":
+				if len(line) != 3:
+					error("A sub operation requires 2 operands.")
+				else:
+					if (line[1] in REGS) and (line[2] in REGS):
+						tBlock.append([SUB[(line[1], line[2])]])
+					else:
+						error("Sub operations can only interact with registers.")
+
+			elif line[0] == "LDA":
+				if len(line) != 3:
+					error("An lda operation requires 2 operands.")
+				else:
+					if (line[1] in REGS) and (line[2] in REGS):
+						tBlock.append([LDA[(line[1], line[2])]])
+					elif (line[1] in REGS) and (line[2].isdigit()):
+						tBlock.append([LDA[(line[1], "INT")]])
+						tBlock.append([line[2]])
+					else:
+						error("Lda operations require registers or memory addresses.")
+
+			elif line[0] == "LDI":
+				if len(line) != 3:
+					error("An ldi operation requires 2 operands.")
+				else:
+					if (line[1] in REGS) and (line[2].isdigit()):
+						tBlock.append([LDI[(line[1], "INT")]])
+						tBlock.append([line[2]])
+					else:
+						error("Ldi operations require a register and an integer.")
+
+			elif line[0] == "STR":
+				if len(line) != 3:
+					error("An str operation requires 2 operands.")
+				else:
+					if (line[1] in REGS) and (line[2] in REGS):
+						tBlock.append([LDA[(line[1], line[2])]])
+					elif (line[2] in REGS) and (line[1].isdigit()):
+						tBlock.append([STR[("INT", line[2])]])
+						tBlock.append([line[1]])
+					else:
+						error("Str operations require registers or memory addresses.")
+
+			elif line[0] == "MV":
+				if len(line) != 3:
+					error("An mv operation requires 2 operands.")
+				else:
+					if (line[1] in REGS) and (line[2] in REGS):
+						tBlock.append([MV[(line[1], line[2])]])
+					else:
+						error("Mv operations can only interact with registers.")
+
+			elif line[0] == "JMP":
+				if len(line) != 2:
+					error("A jmp operation requires 1 operand.")
+				else:
+					if line[1] in REGS:
+						tBlock.append([JMP[(line[1])]])
+					elif line[1].isdigit():
+						tBlock.append([JMP["INT"]])
+						tBlock.append([line[1]])
+
+					else:
+						error("Jmp operations can only take addresses or registers as operands.")
+
+			elif line[0] == "JMPZ":
+				if len(line) != 2:
+					error("A jmpz operation requires 1 operand.")
+				else:
+					if line[1] in REGS:
+						tBlock.append([JMPZ[(line[1])]])
+
+					else:
+						tBlock.append([JMPZ["INT"]])
+						tBlock.append([line[1]])
+
+			elif line[0] == "IN":
+				if len(line) != 2:
+					error("An in operation requires 1 operand.")
+				else:
+					if line[1] in REGS:
+						tBlock.append([IN[line[1]]])
+					else:
+						error("In operations can only interact with registers.")
+
+			elif line[0] == "OUT":
+				if len(line) != 2:
+					error("An out operation requires 1 operand.")
+				else:
+					if line[1] in REGS:
+						tBlock.append([OUT[line[1]]])
+					else:
+						error("Out operations can only interact with registers.")
+
+			else:
+				if len(line) != 1:
+					print("Command found not acceptable.")
+				else:
+					tBlock.append(["Def",line[0]])
+
+		elif data == True:
+
+			if len(line) != 2:
+				error("Data variables must only have 2 arguments.")
+			else:
+				if line[1].isdigit():
+					dBlock.append([line[0], line[1]])
+				else:
+					error("Variables must only contain data.")
+
+		else:
+			error("Instruction block not specified.")
 
 
+	
+
+
+	print(tBlock)
 
 	return ""
 
