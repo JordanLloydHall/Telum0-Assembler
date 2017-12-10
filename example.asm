@@ -1,14 +1,13 @@
-
 section .text
-; Code goes here
 
-_start:
-JMpz 44
-lda a, hello
-jmpz _start
-IN A ; Inputs a reg
-Out b ; Outputs b reg
+_START
+
+LDA A, NUM
+LDI B, 7
+ADD A, B
+
+OUT A
 
 section .data
 
-a 44
+NUM 3

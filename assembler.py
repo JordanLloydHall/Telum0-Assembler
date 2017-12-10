@@ -15,6 +15,8 @@ def evaluate(file):
 	dBlock = []
 	bBlock = []
 
+	addressDefs = {}
+	constDefs = {}
 	totalCode = []
 
 	text = False
@@ -65,7 +67,7 @@ def evaluate(file):
 				else:
 					if (line[1] in REGS) and (line[2] in REGS):
 						tBlock.append([LDA[(line[1], line[2])]])
-					elif (line[1] in REGS) and (line[2].isdigit()):
+					elif (line[1] in REGS):
 						tBlock.append([LDA[(line[1], "INT")]])
 						tBlock.append([line[2]])
 					else:
@@ -77,7 +79,7 @@ def evaluate(file):
 				else:
 					if (line[1] in REGS) and (line[2].isdigit()):
 						tBlock.append([LDI[(line[1], "INT")]])
-						tBlock.append([line[2]])
+						tBlock.append([helper.intToHexStr(int(line[2]))])
 					else:
 						error("Ldi operations require a register and an integer.")
 
@@ -87,7 +89,7 @@ def evaluate(file):
 				else:
 					if (line[1] in REGS) and (line[2] in REGS):
 						tBlock.append([LDA[(line[1], line[2])]])
-					elif (line[2] in REGS) and (line[1].isdigit()):
+					elif (line[2] in REGS):
 						tBlock.append([STR[("INT", line[2])]])
 						tBlock.append([line[1]])
 					else:
@@ -108,12 +110,9 @@ def evaluate(file):
 				else:
 					if line[1] in REGS:
 						tBlock.append([JMP[(line[1])]])
-					elif line[1].isdigit():
+					else:
 						tBlock.append([JMP["INT"]])
 						tBlock.append([line[1]])
-
-					else:
-						error("Jmp operations can only take addresses or registers as operands.")
 
 			elif line[0] == "JMPZ":
 				if len(line) != 2:
@@ -148,7 +147,7 @@ def evaluate(file):
 				if len(line) != 1:
 					print("Command found not acceptable.")
 				else:
-					tBlock.append(["Def",line[0]])
+					tBlock.append(["addressDef",line[0]])
 
 		elif data == True:
 
@@ -163,13 +162,47 @@ def evaluate(file):
 		else:
 			error("Instruction block not specified.")
 
+	for inst in range(len(tBlock)):
+		if (len(tBlock[inst]) == 2) and (tBlock[inst][0] == "addressDef"):
+			if tBlock[inst][1] not in addressDefs:
+				addressDefs[tBlock[inst][1]] = helper.intToHexStr(inst+2)
+			else:
+				error("Found address def that was already stated.")
 
-	
+	for inst in range(len(tBlock)):
+		try:
+			if (len(tBlock[inst]) == 2) and (tBlock[inst][0] == "addressDef"):
+				tBlock.pop(inst)
+		except:
+			break
+
+	if "_START" not in addressDefs:
+		error("Assembly program must have start definition.")
+
+	for const in range(len(dBlock)):
+		if dBlock[const][0] not in constDefs:
+			constDefs[dBlock[const][0]] = helper.intToHexStr(const+2+len(tBlock))
+
+	for inst in range(len(tBlock)):
+		if (not helper.isHex(tBlock[inst][0])) or (len(tBlock[inst][0]) > 2):
+			if tBlock[inst][0] in constDefs:
+				tBlock[inst][0] = constDefs[tBlock[inst][0]]
+
+	for inst in range(len(tBlock)):
+		if (not helper.isHex(tBlock[inst][0])) and (tBlock[inst][0] in addressDefs):
+			tBlock[inst][0] = addressDefs[tBlock[inst][0]]
 
 
-	print(tBlock)
+	totalCode.append(["72"])
+	totalCode.append([addressDefs["_START"]])
+	for inst in tBlock:
+		totalCode.append(inst)
+	for const in dBlock:
+		totalCode.append([helper.intToHexStr(int(const[1]))])
 
-	return ""
+	retText = helper.outText(totalCode)
+
+	return retText
 
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
