@@ -1,12 +1,18 @@
 section .text
 
-_START
+_ADD
+ADD A, B
+JMP _OUT
 
+_START
 LDA A, NUM
 LDI B, 7
-ADD A, B
+JMP _ADD
 
+_OUT
 OUT A
+
+HLT
 
 section .data
 

@@ -143,6 +143,9 @@ def evaluate(file):
 					else:
 						error("Out operations can only interact with registers.")
 
+			elif line[0] == "HLT":
+				tBlock.append([HLT])
+
 			else:
 				if len(line) != 1:
 					print("Command found not acceptable.")
@@ -163,18 +166,17 @@ def evaluate(file):
 			error("Instruction block not specified.")
 
 	for inst in range(len(tBlock)):
-		if (len(tBlock[inst]) == 2) and (tBlock[inst][0] == "addressDef"):
-			if tBlock[inst][1] not in addressDefs:
-				addressDefs[tBlock[inst][1]] = helper.intToHexStr(inst+2)
-			else:
-				error("Found address def that was already stated.")
-
-	for inst in range(len(tBlock)):
 		try:
 			if (len(tBlock[inst]) == 2) and (tBlock[inst][0] == "addressDef"):
-				tBlock.pop(inst)
+				if tBlock[inst][1] not in addressDefs:
+					address = tBlock[inst][1]
+					tBlock.pop(inst)
+					addressDefs[address] = helper.intToHexStr(inst+2)
+				else:
+					error("Found address def that was already stated.")
 		except:
 			break
+
 
 	if "_START" not in addressDefs:
 		error("Assembly program must have start definition.")
@@ -188,10 +190,14 @@ def evaluate(file):
 			if tBlock[inst][0] in constDefs:
 				tBlock[inst][0] = constDefs[tBlock[inst][0]]
 
+	print(len(tBlock))
+
 	for inst in range(len(tBlock)):
 		if (not helper.isHex(tBlock[inst][0])) and (tBlock[inst][0] in addressDefs):
 			tBlock[inst][0] = addressDefs[tBlock[inst][0]]
 
+
+	print(len(tBlock))
 
 	totalCode.append(["72"])
 	totalCode.append([addressDefs["_START"]])
