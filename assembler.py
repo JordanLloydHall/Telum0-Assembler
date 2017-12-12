@@ -125,6 +125,17 @@ def evaluate(file):
 						tBlock.append([JMPZ["INT"]])
 						tBlock.append([line[1]])
 
+			elif line[0] == "JMPC":
+				if len(line) != 2:
+					error("A jmpc operation requires 1 operand.")
+				else:
+					if line[1] in REGS:
+						tBlock.append([JMPC[(line[1])]])
+
+					else:
+						tBlock.append([JMPC["INT"]])
+						tBlock.append([line[1]])
+
 			elif line[0] == "IN":
 				if len(line) != 2:
 					error("An in operation requires 1 operand.")

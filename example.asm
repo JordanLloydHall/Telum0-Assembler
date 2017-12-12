@@ -1,19 +1,32 @@
 section .text
 
-_ADD
-ADD A, B
-JMP _OUT
-
 _START
-LDA A, NUM
-LDI B, 7
-JMP _ADD
+LDI A, 0
+STR XNUM, A
 
-_OUT
+LDI B, 1
+STR YNUM, B
+
+
+_LOOP
 OUT A
+ADD A, B
+JMPC _HALT
+STR ZNUM, A 
+LDA A, YNUM
+STR XNUM, A 
+LDA B, ZNUM
+STR YNUM, B
+JMP _LOOP
 
+
+_HALT
 HLT
 
 section .data
 
-NUM 3
+XNUM 0
+
+YNUM 0
+
+ZNUM 0
